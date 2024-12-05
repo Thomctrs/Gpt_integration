@@ -1,6 +1,6 @@
 # 🖼️ Application Web d'Analyse d'Image 🤖
 
-Réalisée par :
+Réalisée par :  
     - Baptiste JULIENNE  
     - Thomas CATROS  
     - Noé CHABANON  
