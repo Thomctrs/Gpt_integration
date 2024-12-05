@@ -74,13 +74,22 @@
             const analysisResult = document.getElementById('analysisResult');
             let selectedFile = null;
 
-            // File selection
+            // File selection change
+
             imageUpload.addEventListener('change', (e) => {
                 selectedFile = e.target.files[0];
                 if (selectedFile) {
-                    analysisResult.innerHTML = `
-                        <p class="text-gray-300">Image sélectionnée : ${selectedFile.name}</p>
-                    `;
+                    const reader = new FileReader();
+
+                    // Prévisualiser l'image une fois chargée
+                    reader.onload = (event) => {
+                        analysisResult.innerHTML = `
+                            <img src="${event.target.result}" alt="Image sélectionnée" class="max-w-full max-h-full rounded-lg shadow-lg">
+                        `;
+                    };
+
+                    // Lire le fichier sélectionné
+                    reader.readAsDataURL(selectedFile);
                 }
             });
 
@@ -109,21 +118,25 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.analysis) {
-                        analysisResult.innerHTML = `
-                            <p class="text-gray-200">${data.analysis}</p>
-                        `;
-                    } else if (data.error) {
-                        analysisResult.innerHTML = `
-                            <p class="text-red-500">Erreur : ${data.error}</p>
-                        `;
-                    }
-                })
-                .catch(error => {
+                if (data.analysis) {
                     analysisResult.innerHTML = `
-                        <p class="text-red-500">Erreur de connexion : ${error.message}</p>
+                        <div class="flex flex-col items-center space-y-4">
+                            <img src="${URL.createObjectURL(selectedFile)}" alt="Image analysée" class="max-w-full max-h-96 rounded-lg shadow-lg">
+                            <p class="text-gray-200 text-lg">${data.analysis}</p>
+                        </div>
                     `;
-                });
+                } else if (data.error) {
+                    analysisResult.innerHTML = `
+                        <p class="text-red-500">Erreur : ${data.error}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                analysisResult.innerHTML = `
+                    <p class="text-red-500">Erreur de connexion : ${error.message}</p>
+                `;
+            });
+
             });
         });
     </script>
