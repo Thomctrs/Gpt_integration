@@ -6,3 +6,4 @@ flask
 requests
 openai
 python-multipart
+pyttsx3

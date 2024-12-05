@@ -4,6 +4,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from openai import OpenAI
 from dotenv import load_dotenv
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -14,6 +15,7 @@ app.add_middleware(
     allow_methods=["*"],  # Autorise toutes les méthodes HTTP.
     allow_headers=["*"],  # Autorise tous les en-têtes.
 )
+
 
 load_dotenv()
 
@@ -47,6 +49,7 @@ async def analyze_image(file: UploadFile = File(...), prompt: str = "Qu'est ce q
             ],
             max_tokens=300,
         )
+
 
         # Extract and return analysis
         analysis = response.choices[0].message.content
