@@ -21,16 +21,17 @@
         <div class="grid md:grid-cols-2">
             <!-- Section Upload -->
             <div class="p-8 border-r border-gray-700 flex flex-col justify-center items-center">
-                <div class="w-full h-96 border-4 border-dashed border-blue-600 rounded-2xl flex flex-col justify-center items-center cursor-pointer hover:border-blue-400 transition-all group">
+                <input type="file" id="imageUpload" class="hidden" accept="image/*">
+                <label for="imageUpload" class="w-full h-96 border-4 border-dashed border-blue-600 rounded-2xl flex flex-col justify-center items-center cursor-pointer hover:border-blue-400 transition-all group">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-blue-600 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p class="mt-4 text-gray-400 group-hover:text-blue-400 transition-colors">
                         Cliquez pour importer une image
                     </p>
-                </div>
-                
-                <button class="mt-6 px-8 py-3 bg-blue-700 text-white rounded-full hover:bg-blue-600 transition-colors flex items-center space-x-2">
+                </label>
+
+                <button id="analyzeButton" class="mt-6 px-8 py-3 bg-blue-700 text-white rounded-full hover:bg-blue-600 transition-colors flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -40,7 +41,7 @@
 
             <!-- Section Description -->
             <div class="p-8 flex flex-col justify-center">
-                <div class="bg-gray-800 rounded-2xl p-6 min-h-96 flex items-center justify-center text-center">
+                <div id="analysisResult" class="bg-gray-800 rounded-2xl p-6 min-h-96 flex items-center justify-center text-center">
                     <p class="text-gray-500">
                         Votre description apparaîtra ici après l'analyse
                     </p>
@@ -48,7 +49,7 @@
             </div>
         </div>
     </div>
-    
+
     <section class="relative isolate overflow-hidden bg-transparent px-6 py-24 sm:py-32 lg:px-8">
         <div class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.indigo.100),transparent)] opacity-20"></div>
         <div class="absolute inset-y-0 right-1/2 -z-10 mr-16 w-[200%] origin-bottom-left skew-x-[-30deg] bg-transparent shadow-xl shadow-indigo-600/10 ring-1 ring-indigo-50 sm:mr-28 lg:mr-0 xl:mr-16 xl:origin-center"></div>
@@ -65,5 +66,66 @@
             </figure>
         </div>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageUpload = document.getElementById('imageUpload');
+            const analyzeButton = document.getElementById('analyzeButton');
+            const analysisResult = document.getElementById('analysisResult');
+            let selectedFile = null;
+
+            // File selection
+            imageUpload.addEventListener('change', (e) => {
+                selectedFile = e.target.files[0];
+                if (selectedFile) {
+                    analysisResult.innerHTML = `
+                        <p class="text-gray-300">Image sélectionnée : ${selectedFile.name}</p>
+                    `;
+                }
+            });
+
+            // Analyze button click
+            analyzeButton.addEventListener('click', () => {
+                if (!selectedFile) {
+                    analysisResult.innerHTML = `
+                        <p class="text-red-500">Veuillez sélectionner une image d'abord</p>
+                    `;
+                    return;
+                }
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                // Show loading state
+                analysisResult.innerHTML = `
+                    <p class="text-blue-400">Analyse en cours...</p>
+                `;
+
+                // Send to server
+                fetch('http://127.0.0.1:8000/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.analysis) {
+                        analysisResult.innerHTML = `
+                            <p class="text-gray-200">${data.analysis}</p>
+                        `;
+                    } else if (data.error) {
+                        analysisResult.innerHTML = `
+                            <p class="text-red-500">Erreur : ${data.error}</p>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    analysisResult.innerHTML = `
+                        <p class="text-red-500">Erreur de connexion : ${error.message}</p>
+                    `;
+                });
+            });
+        });
+    </script>
 </body>
 </html>
