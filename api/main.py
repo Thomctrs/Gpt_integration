@@ -1,92 +1,56 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
+import base64
+import os
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+from openai import OpenAI
+from dotenv import load_dotenv
+app = FastAPI()
 
-from starlette.responses import JSONResponse
 
-from . import models, schemas, crud
-from .database import engine, get_db
-from .schemas import ImageBase
 
-# Créer les tables
-models.Base.metadata.create_all(bind=engine)
+load_dotenv()
 
-# Initialiser l'application FastAPI
-app = FastAPI(title="Tempus Lux API", description="API pour la boutique de montres de luxe")
+# Initialize OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Routes pour les montres
-@app.get("/watches/", response_model=List[schemas.WatchResponse])
-def read_watches(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    """
-    Récupérer la liste des montres
-    - skip: Nombre de montres à ignorer (pour pagination)
-    - limit: Nombre max de montres à retourner
-    """
-    watches = crud.get_watches(db, skip=skip, limit=limit)
-    print(watches)
-    return [
-        schemas.WatchResponse(
-            watch_id=watch.watch_id,
-            model=watch.model,
-            price=watch.price,
-            description=watch.description,
-            technical_details=watch.technical_details,
-            reference_number=watch.reference_number,
-            movement_type=watch.movement_type,
-            case_material=watch.case_material,
-            water_resistance=watch.water_resistance,
-            diameter=watch.diameter,
-            stock_quantity=watch.stock_quantity,
-            brand_name=watch.brand.name if watch.brand else None,  # Vérifie si la relation existe
-            collection_name=watch.collection.name if watch.collection else None,  # Vérifie si la relation existe
-            images=[
-                schemas.ImageBase(image_url=image.image_url, is_primary=image.is_primary)
-                for image in watch.images
-            ]
+
+@app.post("/analyze-image/")
+async def analyze_image(file: UploadFile = File(...), prompt: str = "What's in this image?"):
+    try:
+        # Read the uploaded file and encode to base64
+        image_content = await file.read()
+        base64_image = base64.b64encode(image_content).decode('utf-8')
+
+        # Analyze image using OpenAI's vision model
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/{file.content_type.split('/')[-1]};base64,{base64_image}"
+                            },
+                        },
+                    ],
+                }
+            ],
+            max_tokens=300,
         )
-        for watch in watches
-    ]
 
-@app.get("/watches/{watch_id}", response_model=schemas.WatchResponse)
-def read_watch(watch_id: int, db: Session = Depends(get_db)):
-    """
-    Récupérer les détails d'une montre spécifique
-    """
-    watch = crud.get_watch(db, watch_id=watch_id)
-    if watch is None:
-        raise HTTPException(status_code=404, detail="Montre non trouvée")
-    return schemas.WatchResponse(
-        watch_id=watch.watch_id,
-        model=watch.model,
-        price=watch.price,
-        description=watch.description,
-        technical_details=watch.technical_details,
-        reference_number=watch.reference_number,
-        movement_type=watch.movement_type,
-        case_material=watch.case_material,
-        water_resistance=watch.water_resistance,
-        diameter=watch.diameter,
-        stock_quantity=watch.stock_quantity,
-        brand_name=watch.brand.name if watch.brand else None,
-        collection_name=watch.collection.name if watch.collection else None,
-        images=[
-            schemas.ImageBase(image_url=image.image_url, is_primary=image.is_primary)
-            for image in watch.images
-        ]
-    )
+        # Extract and return analysis
+        analysis = response.choices[0].message.content
+        return JSONResponse(content={"analysis": analysis})
 
-# Gestion des erreurs 404
-@app.get("/health")
-def health_check():
-    """
-    Point de terminaison pour vérifier la santé de l'API
-    """
-    return {"status": "healthy"}
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
-# Gestion des erreurs 404 personnalisée
-@app.exception_handler(404)
-async def not_found_error(request, exc):
-    return JSONResponse(
-        status_code=404,
-        content={"message": "La ressource demandée n'existe pas"}
-    )
+
+# Run server
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
