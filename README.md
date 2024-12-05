@@ -1,5 +1,10 @@
 # 🖼️ Application Web d'Analyse d'Image 🤖
 
+Réalisée par :
+    - Baptiste JULIENNE  
+    - Thomas CATROS  
+    - Noé CHABANON  
+
 ## 📝 Description
 Une application web permettant de télécharger une image et de l'analyser via GPT-4o à partir d'un prompt personnalisé. L'application offre une interface intuitive pour le téléchargement et l'analyse d'images.
 
