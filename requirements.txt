@@ -1,9 +1,8 @@
 fastapi
 uvicorn
-sqlalchemy
-mysqlclient
 python-dotenv
 pytest
 flask
 requests
-python-dotenv
+openai
+python-multipart
