@@ -24,8 +24,8 @@ Une application web permettant de télécharger une image et de l'analyser via G
 ### Configuration
 1. Clonez le dépôt
 ```bash
-git clone [url-de-votre-dépôt]
-cd [nom-du-dépôt]
+git clone https://github.com/Thomctrs/Gpt_integration.git
+cd Gpt_integration
 ```
 
 2. Installez les dépendances
