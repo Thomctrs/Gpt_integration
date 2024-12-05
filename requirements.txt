@@ -7,3 +7,4 @@ requests
 openai
 python-multipart
 pyttsx3
+aiofiles

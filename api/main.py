@@ -4,8 +4,17 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from openai import OpenAI
 from dotenv import load_dotenv
+
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Autorise toutes les origines. Changez "*" pour un domaine spécifique si nécessaire.
+    allow_methods=["*"],  # Autorise toutes les méthodes HTTP.
+    allow_headers=["*"],  # Autorise tous les en-têtes.
+)
 
 
 load_dotenv()
@@ -15,7 +24,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 @app.post("/analyze-image/")
-async def analyze_image(file: UploadFile = File(...), prompt: str = "What's in this image?"):
+async def analyze_image(file: UploadFile = File(...), prompt: str = "Qu'est ce que l'image?"):
     try:
         # Read the uploaded file and encode to base64
         image_content = await file.read()
@@ -41,6 +50,7 @@ async def analyze_image(file: UploadFile = File(...), prompt: str = "What's in t
             max_tokens=300,
         )
 
+
         # Extract and return analysis
         analysis = response.choices[0].message.content
         return JSONResponse(content={"analysis": analysis})
@@ -52,5 +62,4 @@ async def analyze_image(file: UploadFile = File(...), prompt: str = "What's in t
 # Run server
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -21,13 +21,15 @@
         <div class="grid md:grid-cols-2">
             <!-- Section Upload -->
             <div class="p-8 border-r border-gray-700 flex flex-col justify-center items-center">
-                <div class="w-full h-96 border-4 border-dashed border-blue-600 rounded-2xl flex flex-col justify-center items-center cursor-pointer hover:border-blue-400 transition-all group">
+                <input type="file" id="imageUpload" class="hidden" accept="image/*">
+                <label for="imageUpload" class="w-full h-96 border-4 border-dashed border-blue-600 rounded-2xl flex flex-col justify-center items-center cursor-pointer hover:border-blue-400 transition-all group">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-blue-600 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-lienjoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p class="mt-4 text-gray-400 group-hover:text-blue-400 transition-colors">
                         Cliquez pour importer une image
                     </p>
+<<<<<<< HEAD
                 </div>
                 
                 <div class="flex space-x-4 mt-6">
@@ -45,19 +47,45 @@
                         <span>Écouter</span>
                     </button>
                 </div>
+=======
+                </label>
+
+                <button id="analyzeButton" class="mt-6 px-8 py-3 bg-blue-700 text-white rounded-full hover:bg-blue-600 transition-colors flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Analyser l'image</span>
+                </button>
+                <div id="audioSection" class="mt-4 hidden">
+                    <button id="playAudioButton" class="w-full px-6 py-3 bg-green-700 text-white rounded-full hover:bg-green-600 transition-colors flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                        <span>Écouter la description</span>
+                    </button>
+                    <audio id="audioPlayer" class="hidden"></audio>
+            </div>
+>>>>>>> eda77ae49d8c9a0d66a2e6f230ae555cb7d91ce0
             </div>
 
             <!-- Section Description -->
             <div class="p-8 flex flex-col justify-center">
+<<<<<<< HEAD
                 <div id="descriptionContainer" class="bg-gray-800 rounded-2xl p-6 min-h-96 flex items-center justify-center text-center">
                     <p id="descriptionText" class="text-gray-500">
+=======
+                <div id="analysisResult" class="bg-gray-800 rounded-2xl p-6 min-h-96 flex items-center justify-center text-center">
+                    <p class="text-gray-500">
+>>>>>>> eda77ae49d8c9a0d66a2e6f230ae555cb7d91ce0
                         Votre description apparaîtra ici après l'analyse
                     </p>
                 </div>
             </div>
+
+
         </div>
     </div>
-    
+
     <section class="relative isolate overflow-hidden bg-transparent px-6 py-24 sm:py-32 lg:px-8">
         <div class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.indigo.100),transparent)] opacity-20"></div>
         <div class="absolute inset-y-0 right-1/2 -z-10 mr-16 w-[200%] origin-bottom-left skew-x-[-30deg] bg-transparent shadow-xl shadow-indigo-600/10 ring-1 ring-indigo-50 sm:mr-28 lg:mr-0 xl:mr-16 xl:origin-center"></div>
@@ -76,6 +104,7 @@
     </section>
 
     <script>
+<<<<<<< HEAD
     document.addEventListener('DOMContentLoaded', () => {
         const descriptionText = document.getElementById('descriptionText');
         const speakButton = document.getElementById('speakButton');
@@ -100,6 +129,109 @@
             window.location.href = `tts.py?text=${encodeURIComponent(description)}`;
         });
     });
+=======
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageUpload = document.getElementById('imageUpload');
+            const analyzeButton = document.getElementById('analyzeButton');
+            const analysisResult = document.getElementById('analysisResult');
+            const audioSection = document.getElementById('audioSection');
+            const playAudioButton = document.getElementById('playAudioButton');
+            const audioPlayer = document.getElementById('audioPlayer');
+            let audioFilename = null;
+            let selectedFile = null;
+
+            // File selection change
+
+            imageUpload.addEventListener('change', (e) => {
+                selectedFile = e.target.files[0];
+                if (selectedFile) {
+                    const reader = new FileReader();
+
+                    // Prévisualiser l'image une fois chargée
+                    reader.onload = (event) => {
+                        analysisResult.innerHTML = `
+                            <img src="${event.target.result}" alt="Image sélectionnée" class="max-w-full max-h-full rounded-lg shadow-lg">
+                        `;
+                    };
+
+                    // Lire le fichier sélectionné
+                    reader.readAsDataURL(selectedFile);
+                }
+            });
+
+            // Analyze button click
+            analyzeButton.addEventListener('click', () => {
+                if (!selectedFile) {
+                    analysisResult.innerHTML = `
+                        <p class="text-red-500">Veuillez sélectionner une image d'abord</p>
+                    `;
+                    return;
+                }
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                // Show loading state
+                analysisResult.innerHTML = `
+                    <p class="text-blue-400">Analyse en cours...</p>
+                `;
+
+                // Send to server
+                fetch('http://127.0.0.1:8000/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.analysis) {
+                        // Extract audio filename from response
+                        audioFilename = data.audio_path.split('/').pop();
+
+                        analysisResult.innerHTML = `
+                            <div class="flex flex-col items-center space-y-4">
+                                <img src="${URL.createObjectURL(selectedFile)}" alt="Image analysée" class="max-w-full max-h-96 rounded-lg shadow-lg">
+                                <p class="text-gray-200 text-lg">${data.analysis}</p>
+                            </div>
+                        `;
+
+                        // Show audio section
+                        audioSection.classList.remove('hidden');
+                    } else if (data.error) {
+                        analysisResult.innerHTML = `
+                            <p class="text-red-500">Erreur : ${data.error}</p>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    analysisResult.innerHTML = `
+                        <p class="text-red-500">Erreur de connexion : ${error.message}</p>
+                    `;
+                });
+            });
+
+            // Play audio button
+            playAudioButton.addEventListener('click', () => {
+                if (audioFilename) {
+                    // Fetch audio file
+                    fetch(`http://127.0.0.1:8000/get-audio-description/${audioFilename}`)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        // Create object URL for the audio blob
+                        const audioUrl = URL.createObjectURL(blob);
+                        audioPlayer.src = audioUrl;
+                        audioPlayer.play();
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la récupération de l\'audio:', error);
+                        analysisResult.innerHTML += `
+                            <p class="text-red-500">Impossible de charger l'audio</p>
+                        `;
+                    });
+                }
+            });
+        });
+>>>>>>> eda77ae49d8c9a0d66a2e6f230ae555cb7d91ce0
     </script>
 </body>
 </html>
